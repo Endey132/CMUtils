@@ -7,6 +7,9 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.security.Key;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -118,9 +121,49 @@ public class TextEntryBox implements Element {
             Pattern digit = Pattern.compile("\\d");
             Pattern special = Pattern.compile ("[ :.\\[\\]~-]");
 
+
+            for(InputEventAPI event : events){
+                if(event.isKeyboardEvent() && !event.isConsumed()){
+                    boolean controlHeld = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+                    if(Keyboard.isKeyDown((Keyboard.KEY_BACK))){
+                        if(string.length() > 0){
+                            if(controlHeld){
+                                string.delete(0, string.length());
+                            } else {
+                                string.deleteCharAt(string.length() - 1);
+                            }
+                        }
+                    } else if (controlHeld) {
+                        if (Keyboard.isKeyDown(Keyboard.KEY_V)){
+                            Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            Transferable t = c.getContents(this);
+                            if(t != null){
+                                try{
+                                    String str = (String) t.getTransferData(DataFlavor.stringFlavor);
+                                    StringBuilder copied = new StringBuilder(str);
+                                } catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    } else {
+
+                    }
+                    event.consume();
+                }
+            }
+
+
+
             if (Keyboard.isKeyDown(Keyboard.KEY_BACK) && backOld) {
                 if (string.length() > 0) string.deleteCharAt(string.length() - 1);
                 backOld = false;
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)){
+                if(Keyboard.isKeyDown((Keyboard.KEY_C))){
+
+                } else if (Keyboard.isKeyDown((Keyboard.KEY_V))){
+
+                }
             } else {
                 if (string.length() < params.maxChars) {
                     for (InputEventAPI event : events) {
